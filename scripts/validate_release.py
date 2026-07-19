@@ -13,21 +13,53 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_DIR = ROOT / "n8n" / "workflows"
 SKILL_ROOT = ROOT / "skills"
+CATALOG_PATH = ROOT / "docs" / "catalog" / "projects.json"
 
 TEXT_DENYLIST = {
     "/Users/": "private absolute macOS path",
+    "/home/": "private absolute Linux path",
     "justuss@": "private email address",
     "nimbleway.com": "company-internal address or domain",
     "BEGIN PRIVATE KEY": "private key material",
+    "BEGIN RSA PRIVATE KEY": "private key material",
+    "BEGIN EC PRIVATE KEY": "private key material",
     "BEGIN OPENSSH PRIVATE KEY": "private key material",
 }
 SECRET_PATTERNS = {
     "GitHub token": re.compile(r"\bgh(?:o|p|s|u|r)_[A-Za-z0-9]{20,}\b"),
+    "GitHub fine-grained token": re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b"),
     "AWS access key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    "Google API key": re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b"),
+    "Slack token": re.compile(r"\bxox(?:a|b|p|r|s)-[A-Za-z0-9-]{16,}\b"),
+    "Stripe live key": re.compile(r"\b(?:sk|rk)_live_[A-Za-z0-9]{16,}\b"),
     "generic secret assignment": re.compile(
         r"(?i)\b(?:api[_-]?key|token|password|client[_-]?secret)\b\s*[:=]\s*['\"](?!REPLACE_|example|placeholder)[^'\"\s]{12,}"
     ),
     "bearer token": re.compile(r"(?i)\bBearer\s+(?!<|REPLACE_|example)[A-Za-z0-9._~-]{16,}"),
+    "private email address": re.compile(
+        r"(?i)\b[A-Z0-9._%+-]+@(?!example\.(?:com|org)\b|users\.noreply\.github\.com\b)[A-Z0-9.-]+\.[A-Z]{2,}\b"
+    ),
+}
+
+FORBIDDEN_PATH_PARTS = {
+    ".env",
+    "archive",
+    "data",
+    "fixtures-private",
+    "logs",
+    "output",
+    "outputs",
+    "private",
+    "tmp",
+}
+
+FORBIDDEN_FILENAMES = {
+    ".git-credentials",
+    ".netrc",
+    ".npmrc",
+    "credentials.json",
+    "secrets.json",
+    "token.json",
 }
 
 
@@ -47,12 +79,71 @@ def scan_text(errors: list[str]) -> None:
         except UnicodeDecodeError:
             continue
         relative = path.relative_to(ROOT)
+        relative_parts = {part.lower() for part in relative.parts}
+        if relative.name.lower() in FORBIDDEN_FILENAMES:
+            fail(errors, f"{relative}: forbidden sensitive filename")
+        forbidden_parts = sorted(relative_parts & FORBIDDEN_PATH_PARTS)
+        if forbidden_parts:
+            fail(errors, f"{relative}: forbidden private/runtime path part {forbidden_parts[0]!r}")
         for needle, label in TEXT_DENYLIST.items():
             if needle in text:
                 fail(errors, f"{relative}: {label}: {needle}")
         for label, pattern in SECRET_PATTERNS.items():
             if pattern.search(text):
                 fail(errors, f"{relative}: possible {label}")
+
+
+def validate_catalog(errors: list[str]) -> None:
+    try:
+        catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        fail(errors, "docs/catalog/projects.json: catalog is required")
+        return
+    except json.JSONDecodeError as exc:
+        fail(errors, f"docs/catalog/projects.json: invalid JSON: {exc}")
+        return
+
+    projects = catalog.get("projects")
+    if catalog.get("schema_version") != 1 or not isinstance(projects, list):
+        fail(errors, "docs/catalog/projects.json: schema_version=1 and projects[] are required")
+        return
+
+    required = {"id", "title", "kind", "status", "public_surface", "kept_private"}
+    seen: set[str] = set()
+    for index, project in enumerate(projects):
+        if not isinstance(project, dict):
+            fail(errors, f"docs/catalog/projects.json: projects[{index}] must be an object")
+            continue
+        missing = sorted(required - set(project))
+        if missing:
+            fail(errors, f"docs/catalog/projects.json: projects[{index}] missing {', '.join(missing)}")
+        project_id = project.get("id")
+        if not isinstance(project_id, str) or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", project_id):
+            fail(errors, f"docs/catalog/projects.json: projects[{index}].id must be kebab-case")
+        elif project_id in seen:
+            fail(errors, f"docs/catalog/projects.json: duplicate project id {project_id!r}")
+        else:
+            seen.add(project_id)
+        if project.get("kind") not in {"architecture", "concept", "skill", "standalone"}:
+            fail(errors, f"docs/catalog/projects.json: {project_id!r} has invalid kind")
+        if project.get("status") not in {"published", "documented", "queued"}:
+            fail(errors, f"docs/catalog/projects.json: {project_id!r} has invalid status")
+        public_surface = project.get("public_surface")
+        if not isinstance(public_surface, str) or not public_surface:
+            fail(errors, f"docs/catalog/projects.json: {project_id!r} requires public_surface")
+        elif public_surface.startswith("https://"):
+            if not public_surface.startswith("https://github.com/justus20santiago-web/"):
+                fail(errors, f"docs/catalog/projects.json: {project_id!r} has an unapproved external surface")
+        elif public_surface.startswith(("http://", "/")) or ".." in Path(public_surface).parts:
+            fail(errors, f"docs/catalog/projects.json: {project_id!r} has an unsafe public surface")
+        elif not (ROOT / public_surface).is_file():
+            fail(errors, f"docs/catalog/projects.json: {project_id!r} surface does not exist: {public_surface}")
+
+        kept_private = project.get("kept_private")
+        if not isinstance(kept_private, list) or not kept_private:
+            fail(errors, f"docs/catalog/projects.json: {project_id!r} requires a non-empty kept_private list")
+        elif any(not isinstance(item, str) or not item.strip() for item in kept_private):
+            fail(errors, f"docs/catalog/projects.json: {project_id!r} kept_private values must be non-empty strings")
 
 
 def walk_credentials(value: Any, path: str = "root") -> list[tuple[str, str]]:
@@ -143,6 +234,7 @@ def validate_skills(errors: list[str]) -> None:
 def main() -> int:
     errors: list[str] = []
     scan_text(errors)
+    validate_catalog(errors)
     validate_workflows(errors)
     validate_skills(errors)
     if errors:

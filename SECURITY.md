@@ -9,6 +9,12 @@
 - Active workflow exports, execution data, pin data, or production campaign IDs
 - Vendor payloads copied from authenticated applications
 
+## Reconstruction rule
+
+Public releases are rebuilt from contracts, mock schemas, tests, and architectural behavior. They are never folder copies, filtered Git histories, or exports of a private working repository. A useful pattern can be public even when its production implementation, configuration, and evidence remain private.
+
+Every public artifact must have an explicit inventory entry in `docs/catalog/projects.json`, a named public surface, and a `kept_private` boundary. If that boundary cannot be stated precisely, the artifact stays private.
+
 ## n8n safety
 
 Every workflow in `n8n/workflows/` must:

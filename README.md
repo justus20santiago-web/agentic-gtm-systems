@@ -18,6 +18,7 @@ flowchart LR
 
 | Area | Contents |
 |---|---|
+| [Project catalog](docs/catalog/README.md) | Public map of significant systems, their safe publication form, and standalone repositories |
 | [Architecture and concepts](docs/README.md) | Layer boundaries, n8n/MCP control-plane design, memory, evidence, receipts, autonomy, and review |
 | [Skills](skills/README.md) | Reusable agent skills for bounded resolution loops, test loops, messaging QA, MCP audits, and tool experts |
 | [n8n](n8n/README.md) | Inactive, credential-free workflow blueprints with setup and validation notes |
@@ -35,7 +36,7 @@ flowchart LR
 
 This is a curated pattern library, not a snapshot of a production environment. It intentionally excludes credentials, customer or prospect data, internal endpoints, account-specific logic, live campaign IDs, browser profiles, private paths, and enabled outbound workflows. See [SECURITY.md](SECURITY.md).
 
-The related [Ideaverse](https://github.com/justus20santiago-web/ideaverse) project is already published separately.
+Standalone public projects are tracked in the [project catalog](docs/catalog/README.md). A standalone repository is used only when the artifact is independently runnable. Shared subsystems stay here as architecture and contracts instead of being copied out of a private production tree.
 
 ## Status
 
