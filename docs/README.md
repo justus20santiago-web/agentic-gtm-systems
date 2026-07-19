@@ -14,6 +14,7 @@ Start with the [public project catalog](catalog/README.md) for the map from sign
 - [Portable agent runtime](architecture/portable-agent-runtime.md): role separation, routing contracts, and local runtime boundaries
 - [Bounded maintenance loop](architecture/bounded-maintenance-loop.md): contract-first autonomous repair with green-or-revert behavior
 - [Publication factory](architecture/publication-factory.md): reconstructive public releases with machine-enforced privacy gates
+- [Polly feedback loop](architecture/polly-feedback-loop.md): idempotent human labeling, append-only feedback, and gated prompt improvement
 
 ## Portable concepts
 

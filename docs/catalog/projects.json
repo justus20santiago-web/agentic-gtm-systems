@@ -82,6 +82,14 @@
       "kept_private": ["target lists", "signal observations", "outreach decisions"]
     },
     {
+      "id": "polly-feedback-loop",
+      "title": "Polly feedback and prompt-improvement loop",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/polly-feedback-loop.md",
+      "kept_private": ["workspace and reviewer identities", "signal payloads", "authentication state", "delivery receipts", "labeled production evidence"]
+    },
+    {
       "id": "portable-agent-skills",
       "title": "Portable agent skills",
       "kind": "skill",

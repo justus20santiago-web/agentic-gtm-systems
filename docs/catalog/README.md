@@ -33,6 +33,7 @@ flowchart LR
 | Safe public reconstruction | [Publication factory](../architecture/publication-factory.md) |
 | n8n and MCP orchestration | [n8n and MCP control plane](../architecture/n8n-mcp-control-plane.md) |
 | Signal discovery and qualification | [Signal monitor contract](../concepts/signal-monitor-contract.md) |
+| Human signal feedback and prompt improvement | [Polly feedback loop](../architecture/polly-feedback-loop.md) |
 
 ## Reusable execution skills
 
