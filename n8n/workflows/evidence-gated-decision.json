@@ -1,0 +1,138 @@
+{
+  "id": "bpEvidenceGate01",
+  "name": "Blueprint - Evidence-gated decision",
+  "description": "Demonstrates a policy boundary between evidence-backed internal work and a human review hold. It contains no external actions and is inactive by design.",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Run example",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "receipt-id",
+              "name": "evidence_receipt_id",
+              "value": "example_receipt_001",
+              "type": "string"
+            },
+            {
+              "id": "evidence-verified",
+              "name": "evidence_verified",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "in-scope",
+              "name": "in_scope",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "action-approved",
+              "name": "action_approved",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "next-action",
+              "name": "next_action",
+              "value": "produce_internal_brief",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "example-evidence-receipt",
+      "name": "Example evidence receipt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "verified-condition",
+              "leftValue": "={{ $('Example evidence receipt').item.json.evidence_verified }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "scope-condition",
+              "leftValue": "={{ $('Example evidence receipt').item.json.in_scope }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "approval-condition",
+              "leftValue": "={{ $('Example evidence receipt').item.json.action_approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "policy-gate",
+      "name": "Evidence and policy pass?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [740, 300]
+    },
+    {
+      "parameters": {},
+      "id": "approved-action",
+      "name": "Approved internal action",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1000, 220]
+    },
+    {
+      "parameters": {},
+      "id": "hold-review",
+      "name": "Hold for review",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1000, 380]
+    }
+  ],
+  "connections": {
+    "Run example": {
+      "main": [[{"node": "Example evidence receipt", "type": "main", "index": 0}]]
+    },
+    "Example evidence receipt": {
+      "main": [[{"node": "Evidence and policy pass?", "type": "main", "index": 0}]]
+    },
+    "Evidence and policy pass?": {
+      "main": [
+        [{"node": "Approved internal action", "type": "main", "index": 0}],
+        [{"node": "Hold for review", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {}
+}

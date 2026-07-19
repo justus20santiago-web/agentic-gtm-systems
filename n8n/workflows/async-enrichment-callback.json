@@ -1,0 +1,109 @@
+{
+  "id": "bpAsyncCallbk01",
+  "name": "Blueprint - Receive enrichment callback",
+  "description": "Receives an authenticated enrichment result, appends a minimal observation to a result store, and returns an explicit success or upstream-error response. Credentials and resource IDs are placeholders.",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "enrichment-callback-template",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "callback-webhook",
+      "name": "Receive authenticated callback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_HEADER_AUTH_CREDENTIAL_ID",
+          "name": "Enrichment Callback Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_RESULT_STORE_DOCUMENT_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Results",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "request_id": "={{ $('Receive authenticated callback').item.json.body.request_id }}",
+            "field": "={{ $('Receive authenticated callback').item.json.body.field }}",
+            "value": "={{ $('Receive authenticated callback').item.json.body.value }}",
+            "source": "={{ $('Receive authenticated callback').item.json.body.source }}",
+            "observed_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "append-observation",
+      "name": "Append observation",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [520, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, request_id: $('Receive authenticated callback').item.json.body.request_id } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-success",
+      "name": "Respond success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [800, 220]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: 'upstream_write_failed', message: 'The result store rejected the callback.' } }}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "id": "respond-upstream-error",
+      "name": "Respond upstream error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [800, 380]
+    }
+  ],
+  "connections": {
+    "Receive authenticated callback": {
+      "main": [[{"node": "Append observation", "type": "main", "index": 0}]]
+    },
+    "Append observation": {
+      "main": [
+        [{"node": "Respond success", "type": "main", "index": 0}],
+        [{"node": "Respond upstream error", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {}
+}

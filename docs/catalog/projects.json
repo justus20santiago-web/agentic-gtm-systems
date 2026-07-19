@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "projects": [
+    {
+      "id": "governed-agentic-gtm",
+      "title": "Governed agent execution",
+      "kind": "architecture",
+      "status": "published",
+      "public_surface": "docs/architecture/governed-agentic-gtm.md",
+      "kept_private": ["deployment policy", "production adapters", "operational identities"]
+    },
+    {
+      "id": "evidence-research-pipeline",
+      "title": "Evidence-first research briefs",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/evidence-research-pipeline.md",
+      "kept_private": ["provider credentials", "customer context", "source payloads"]
+    },
+    {
+      "id": "browser-lane-supervisor",
+      "title": "Browser lane supervisor",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/browser-lane-supervisor.md",
+      "kept_private": ["browser profiles", "session state", "identity configuration"]
+    },
+    {
+      "id": "knowledge-promotion-loop",
+      "title": "Knowledge promotion loop",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/knowledge-promotion-loop.md",
+      "kept_private": ["private research corpus", "session transcripts", "operator memory"]
+    },
+    {
+      "id": "evidence-graph",
+      "title": "Evidence graph",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/evidence-graph.md",
+      "kept_private": ["account graphs", "contact identities", "derived production packets"]
+    },
+    {
+      "id": "portable-agent-runtime",
+      "title": "Portable agent runtime",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/portable-agent-runtime.md",
+      "kept_private": ["machine configuration", "tool credentials", "private routing policy"]
+    },
+    {
+      "id": "bounded-maintenance-loop",
+      "title": "Bounded maintenance loop",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/bounded-maintenance-loop.md",
+      "kept_private": ["private repository graph", "incident history", "deployment commands"]
+    },
+    {
+      "id": "publication-factory",
+      "title": "Public architecture publication factory",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/publication-factory.md",
+      "kept_private": ["source inventory", "internal denylist", "release credentials"]
+    },
+    {
+      "id": "n8n-mcp-control-plane",
+      "title": "n8n and MCP control plane",
+      "kind": "architecture",
+      "status": "published",
+      "public_surface": "docs/architecture/n8n-mcp-control-plane.md",
+      "kept_private": ["workflow identifiers", "credentials", "active production workflows"]
+    },
+    {
+      "id": "signal-monitor-contract",
+      "title": "Signal monitor contract",
+      "kind": "concept",
+      "status": "published",
+      "public_surface": "docs/concepts/signal-monitor-contract.md",
+      "kept_private": ["target lists", "signal observations", "outreach decisions"]
+    },
+    {
+      "id": "polly-feedback-loop",
+      "title": "Polly feedback and prompt-improvement loop",
+      "kind": "architecture",
+      "status": "documented",
+      "public_surface": "docs/architecture/polly-feedback-loop.md",
+      "kept_private": ["workspace and reviewer identities", "signal payloads", "authentication state", "delivery receipts", "labeled production evidence"]
+    },
+    {
+      "id": "portable-agent-skills",
+      "title": "Portable agent skills",
+      "kind": "skill",
+      "status": "published",
+      "public_surface": "skills/README.md",
+      "kept_private": ["tool sessions", "recordings", "production adapters"]
+    },
+    {
+      "id": "salesnav-readonly-extension",
+      "title": "Governed Sales Navigator read-only extension",
+      "kind": "standalone",
+      "status": "published",
+      "public_surface": "https://github.com/justus20santiago-web/salesnav-readonly-extension",
+      "kept_private": ["browser credentials", "production bridge", "captured responses"]
+    },
+    {
+      "id": "ideaverse",
+      "title": "Ideaverse",
+      "kind": "standalone",
+      "status": "published",
+      "public_surface": "https://github.com/justus20santiago-web/ideaverse",
+      "kept_private": ["authenticated research state", "local history", "private prompts"]
+    }
+  ]
+}
